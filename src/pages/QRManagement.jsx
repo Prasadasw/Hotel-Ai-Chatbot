@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Download, Printer, Share2, QrCode as QrCodeIcon } from 'lucide-react';
+import { Download, Printer, Share2, QrCode as QrCodeIcon, ExternalLink, Copy, Check } from 'lucide-react';
 import { getAllHotels } from '../utils/dataTransformer';
 
 const QRManagement = () => {
@@ -9,6 +9,7 @@ const QRManagement = () => {
   const [selectedRoom, setSelectedRoom] = useState('');
   const [qrData, setQrData] = useState('');
   const [displayMode, setDisplayMode] = useState('single'); // 'single' or 'bulk'
+  const [copied, setCopied] = useState(false);
 
   const hotels = getAllHotels();
 
@@ -72,6 +73,12 @@ const QRManagement = () => {
     // This would generate QR codes for all rooms
     // For now, just show a message
     alert('Bulk QR generation feature coming soon!');
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(qrData);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -201,8 +208,39 @@ const QRManagement = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Room Information</h3>
                 <div className="space-y-2">
                   <div className="py-2 border-b border-gray-200">
-                    <span className="text-gray-600 text-sm block mb-1">QR URL:</span>
-                    <span className="font-mono text-xs text-blue-600 break-all">{qrData}</span>
+                    <span className="text-gray-600 text-sm block mb-2">QR URL:</span>
+                    <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200 group hover:border-blue-300 transition-colors">
+                      <a
+                        href={qrData}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs text-blue-600 hover:text-blue-700 break-all flex-1 transition-colors cursor-pointer"
+                      >
+                        {qrData}
+                      </a>
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={qrData}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                          title="Open in new tab"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                        <button
+                          onClick={copyToClipboard}
+                          className="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                          title="Copy to clipboard"
+                        >
+                          {copied ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-200">
                     <span className="text-gray-600">Room Number:</span>
