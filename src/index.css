@@ -43,6 +43,21 @@
     scrollbar-width: thin;
     scrollbar-color: #1d4ed8 #1e3a8a;
   }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+  }
 }
 
 /* Smooth scrolling */

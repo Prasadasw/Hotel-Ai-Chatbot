@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, Minimize2 } from 'lucide-react';
+import { Send, Bot, User, X, Minimize2, Sparkles, MessageSquare } from 'lucide-react';
 
 const Chatbot = ({ room, hotel, block }) => {
   const [messages, setMessages] = useState([
@@ -23,6 +23,7 @@ const Chatbot = ({ room, hotel, block }) => {
   const [input, setInput] = useState('');
   const [isOpen, setIsOpen] = useState(true); // Open by default
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -159,16 +160,18 @@ const Chatbot = ({ room, hotel, block }) => {
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setIsTyping(true);
 
-    // Simulate bot thinking
+    // Simulate bot thinking with typing animation
     setTimeout(() => {
+      setIsTyping(false);
       const botResponse = {
         role: 'bot',
         content: getBotResponse(messageText),
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botResponse]);
-    }, 500);
+    }, 800);
   };
 
   const handleQuickQuestion = (question) => {
@@ -177,47 +180,72 @@ const Chatbot = ({ room, hotel, block }) => {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
         <button
           onClick={() => setIsOpen(true)}
-          className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all hover:scale-110 flex items-center justify-center animate-pulse"
+          className="group relative w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 text-white rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all hover:scale-110 flex items-center justify-center"
         >
-          <Bot className="w-10 h-10" />
+          {/* Pulse rings */}
+          <div className="absolute inset-0 rounded-full bg-blue-600 animate-ping opacity-20"></div>
+          <div className="absolute inset-0 rounded-full bg-blue-500 animate-pulse opacity-30"></div>
+          
+          {/* Bot icon with glow effect */}
+          <div className="relative z-10">
+            <Bot className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
+          </div>
+          
+          {/* Sparkle effect */}
+          <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 animate-pulse" />
         </button>
-        <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-bounce">
-          1
+        
+        {/* Notification badge */}
+        <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg animate-bounce">
+          <MessageSquare className="w-4 h-4" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`fixed bottom-6 right-6 w-[450px] bg-white rounded-xl shadow-2xl z-50 transition-all duration-300 border-2 border-blue-200 ${
-      isMinimized ? 'h-16' : 'h-[650px]'
+    <div className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 w-[calc(100vw-2rem)] md:w-[450px] max-w-[450px] bg-white rounded-2xl shadow-2xl z-50 transition-all duration-300 border-2 border-blue-200 overflow-hidden ${
+      isMinimized ? 'h-16' : 'h-[calc(100vh-8rem)] md:h-[650px] max-h-[650px]'
     }`}>
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-5 rounded-t-xl flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-            <Bot className="w-7 h-7" />
+      {/* Header with gradient background */}
+      <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-4 md:p-5 rounded-t-2xl flex items-center justify-between shadow-lg overflow-hidden">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-40 h-40 bg-purple-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+        
+        <div className="flex items-center gap-2 md:gap-3 relative z-10">
+          <div className="relative w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <div className="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
+            <Bot className="w-6 h-6 md:w-7 md:h-7 relative z-10" />
           </div>
           <div>
-            <h3 className="font-bold text-lg">🤖 Room Assistant</h3>
-            <p className="text-xs text-blue-100">Room {room?.roomNo} - Always here to help!</p>
+            <h3 className="font-bold text-base md:text-lg flex items-center gap-1">
+              <Sparkles className="w-4 h-4 text-yellow-300" />
+              Room Assistant
+            </h3>
+            <p className="text-xs text-blue-100 hidden md:block">Room {room?.roomNo} - Always here to help!</p>
+            <p className="text-xs text-blue-100 md:hidden">Room {room?.roomNo}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2 relative z-10">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-all hover:scale-110 active:scale-95"
+            aria-label="Minimize"
           >
-            <Minimize2 className="w-5 h-5" />
+            <Minimize2 className="w-4 h-4 md:w-5 md:h-5" />
           </button>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-all hover:scale-110 active:scale-95"
+            aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </div>
@@ -225,50 +253,78 @@ const Chatbot = ({ room, hotel, block }) => {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <div className="h-[400px] overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 bg-gradient-to-b from-gray-50 to-white">
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
+                  className={`max-w-[85%] md:max-w-[80%] rounded-2xl p-3 md:p-4 shadow-sm transition-all hover:shadow-md ${
                     msg.role === 'user'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white'
                       : 'bg-white text-gray-900 border border-gray-200'
                   }`}
                 >
                   {msg.role === 'bot' && (
-                    <div className="flex items-center gap-2 mb-1">
-                      <Bot className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-semibold text-blue-600">Assistant</span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                        <Bot className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <span className="text-xs font-semibold text-blue-600">AI Assistant</span>
                     </div>
                   )}
                   {msg.role === 'user' && (
-                    <div className="flex items-center gap-2 mb-1 justify-end">
+                    <div className="flex items-center gap-2 mb-2 justify-end">
                       <span className="text-xs font-semibold text-blue-100">You</span>
-                      <User className="w-4 h-4 text-blue-100" />
+                      <div className="w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
+                        <User className="w-3.5 h-3.5 text-white" />
+                      </div>
                     </div>
                   )}
-                  <p className="text-sm whitespace-pre-line">{msg.content}</p>
-                  <span className="text-xs opacity-70 mt-1 block">
+                  <p className="text-sm md:text-base whitespace-pre-line leading-relaxed">{msg.content}</p>
+                  <span className="text-xs opacity-70 mt-2 block">
                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               </div>
             ))}
+            
+            {/* Typing indicator */}
+            {isTyping && (
+              <div className="flex justify-start animate-fade-in">
+                <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <Bot className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="text-xs font-semibold text-blue-600">AI Assistant</span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Questions - Always Visible */}
-          <div className="px-4 py-3 bg-white border-t border-gray-200">
-            <p className="text-xs text-gray-600 mb-2 font-medium">Quick Questions:</p>
-            <div className="flex flex-wrap gap-2">
+          {/* Quick Questions - Scrollable on Mobile */}
+          <div className="px-3 md:px-4 py-3 bg-white border-t border-gray-200">
+            <p className="text-xs text-gray-600 mb-2 font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-blue-600" />
+              Quick Questions:
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {quickQuestions.map((question, index) => (
                 <button
                   key={index}
                   onClick={() => handleQuickQuestion(question)}
-                  className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs hover:bg-blue-100 transition-colors"
+                  className="px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-full text-xs font-medium hover:from-blue-100 hover:to-indigo-100 transition-all whitespace-nowrap border border-blue-200 hover:border-blue-300 hover:scale-105 active:scale-95 shadow-sm"
                 >
                   {question}
                 </button>
@@ -277,18 +333,19 @@ const Chatbot = ({ room, hotel, block }) => {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSend} className="p-4 border-t-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <form onSubmit={handleSend} className="p-3 md:p-4 border-t-2 border-blue-200 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="💬 Ask me anything about your room..."
-                className="flex-1 px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                placeholder="💬 Ask me anything..."
+                className="flex-1 px-4 py-3 md:py-3.5 border-2 border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm text-sm md:text-base transition-all"
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl"
+                disabled={!input.trim()}
+                className="px-5 md:px-6 py-3 md:py-3.5 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white rounded-xl hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
               >
                 <Send className="w-5 h-5" />
               </button>
